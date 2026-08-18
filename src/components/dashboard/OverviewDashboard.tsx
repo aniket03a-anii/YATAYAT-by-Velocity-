@@ -21,6 +21,13 @@ import {
   Radio,
   ExternalLink,
   MapPin,
+  Sliders,
+  BarChart2,
+  Zap,
+  Activity,
+  Heart,
+  Database,
+  Check,
 } from 'lucide-react';
 
 interface OverviewDashboardProps {
@@ -423,6 +430,288 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             </span>
           </div>
         </div>
+      </div>
+
+      {/* 4. FOUR BOTTOM TELEMETRY PANELS matching Screenshot 084617 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {/* PANEL 1: Junction Risk Profile Distribution */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="text-blue-600 font-bold">
+                <BarChart2 className="w-4 h-4" />
+              </span>
+              <h4 className="text-xs font-bold text-slate-900">
+                Junction Risk Profile Distribution
+              </h4>
+            </div>
+            <button
+              onClick={() => onNavigateToIncidents()}
+              className="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-0.5 cursor-pointer"
+            >
+              <span>Risk Matrix</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* Bar Distribution */}
+          <div className="space-y-2">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-slate-500 font-medium">Low Risk (0 - 30)</span>
+                <span className="font-mono font-bold text-emerald-700">1</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div className="bg-emerald-500 h-full w-[7%]" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-slate-500 font-medium">Medium (31 - 60)</span>
+                <span className="font-mono font-bold text-amber-700">11</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div className="bg-amber-500 h-full w-[73%]" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-slate-500 font-medium">High (61 - 80)</span>
+                <span className="font-mono font-bold text-orange-700">2</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div className="bg-orange-500 h-full w-[13%]" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-slate-500 font-medium">Critical (81 - 100)</span>
+                <span className="font-mono font-bold text-rose-700">1</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div className="bg-rose-500 h-full w-[7%]" />
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+            <span>CITY AVG: <strong className="text-slate-800">39/100</strong></span>
+            <span className="truncate max-w-[140px]">TOP WATCH: Sitabuldi Intercha...</span>
+          </div>
+        </div>
+
+        {/* PANEL 2: Congestion Telemetry & Modals */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="text-blue-600 font-bold">
+                <Activity className="w-4 h-4" />
+              </span>
+              <h4 className="text-xs font-bold text-slate-900">
+                Congestion Telemetry & Modals
+              </h4>
+            </div>
+            <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 text-[9px] font-mono font-bold">
+              PEAK TELEMETRY
+            </span>
+          </div>
+
+          <div className="space-y-2 text-xs">
+            <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <span className="text-slate-500">CURRENT CITY CHOKE:</span>
+              <span className="font-mono font-bold text-amber-700 flex items-center gap-1">
+                <span>43%</span>
+                <span className="text-[10px] text-slate-500">↑ Moderate Density</span>
+              </span>
+            </div>
+
+            <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <span className="text-slate-500">AVG ARTERIAL SPEED:</span>
+              <span className="font-mono font-bold text-slate-800">
+                35.7 km/h <span className="text-[10px] text-slate-500 font-normal">Limit: 50 km/h</span>
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-[11px] text-slate-500">
+                <span>Modal Split (Sensors):</span>
+                <span className="font-mono font-bold text-slate-700">42% 2W • 47% 4W</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden flex">
+                <div className="bg-blue-600 h-full w-[42%]" title="Two-Wheelers (42%)" />
+                <div className="bg-amber-500 h-full w-[47%]" title="Four-Wheelers (47%)" />
+                <div className="bg-emerald-500 h-full w-[11%]" title="Buses / Heavy (11%)" />
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100 text-[10px] text-slate-400 font-mono">
+            AI Predictive Forecasting Engine (30-min horizon) online.
+          </div>
+        </div>
+
+        {/* PANEL 3: Active Field Deployments */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="text-blue-600 font-bold">
+                <Shield className="w-4 h-4" />
+              </span>
+              <h4 className="text-xs font-bold text-slate-900">
+                Active Field Deployments
+              </h4>
+            </div>
+            <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-[9px] font-mono font-bold">
+              10 UNITS ASSIGNED
+            </span>
+          </div>
+
+          <div className="space-y-1.5 overflow-y-auto max-h-[140px] pr-1 text-xs">
+            {/* Unit 1 */}
+            <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-1.5">
+              <div className="space-y-0.5 truncate">
+                <div className="font-bold text-slate-800 text-[11px] truncate flex items-center gap-1">
+                  <Radio className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span>Constable Dinesh Gaikwad (NTP-060)</span>
+                </div>
+                <div className="text-[10px] text-slate-500 truncate">
+                  Sitabuldi Interchange (Demo Junction A)
+                </div>
+              </div>
+              <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 text-[9px] font-mono font-bold shrink-0">
+                ACCEPTED
+              </span>
+            </div>
+
+            {/* Unit 2 */}
+            <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-1.5">
+              <div className="space-y-0.5 truncate">
+                <div className="font-bold text-slate-800 text-[11px] truncate flex items-center gap-1">
+                  <Radio className="w-3 h-3 text-amber-600 shrink-0" />
+                  <span>Constable Nitin Bawankule (NTP-093)</span>
+                </div>
+                <div className="text-[10px] text-slate-500 truncate">
+                  Sitabuldi Interchange (Demo Junction A)
+                </div>
+              </div>
+              <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-200 text-[9px] font-mono font-bold shrink-0">
+                OVERRIDDEN
+              </span>
+            </div>
+
+            {/* Unit 3 */}
+            <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-1.5">
+              <div className="space-y-0.5 truncate">
+                <div className="font-bold text-slate-800 text-[11px] truncate flex items-center gap-1">
+                  <Radio className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span>Constable Suresh Kolhe (NTP-148)</span>
+                </div>
+                <div className="text-[10px] text-slate-500 truncate">
+                  Sitabuldi Interchange (Demo Junction A)
+                </div>
+              </div>
+              <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 text-[9px] font-mono font-bold shrink-0">
+                ACCEPTED
+              </span>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+            <span>Patrol Network: Zone 1 - 4</span>
+            <span className="text-emerald-700 font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              100% Radio Comms Active
+            </span>
+          </div>
+        </div>
+
+        {/* PANEL 4: Signal Controller Telemetry */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="text-blue-600 font-bold">
+                <Sliders className="w-4 h-4" />
+              </span>
+              <h4 className="text-xs font-bold text-slate-900">
+                Signal Controller Telemetry
+              </h4>
+            </div>
+            <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-[9px] font-mono font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              ATCS ONLINE
+            </span>
+          </div>
+
+          <div className="space-y-2 text-xs">
+            <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <span className="text-slate-500">Webster Cycle Optimization:</span>
+              <span className="font-mono font-bold text-emerald-700">ACTIVE (120s)</span>
+            </div>
+
+            <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-slate-500">Sitabuldi Stage Telemetry:</span>
+                <span className="font-mono font-bold text-emerald-600">N/S Green: 65s</span>
+              </div>
+              <div className="w-full h-1.5 rounded-full bg-slate-200 overflow-hidden flex">
+                <div className="bg-emerald-500 h-full w-[55%]" />
+                <div className="bg-amber-500 h-full w-[10%]" />
+                <div className="bg-rose-500 h-full w-[35%]" />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] text-slate-500">
+              <span>Connected Junctions:</span>
+              <span className="font-mono font-bold text-slate-800">124 / 124 Online</span>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+            <span>Protocol: NTCIP / SCATS</span>
+            <span className="text-blue-600 font-bold">Latency: 14ms</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. SYSTEM DIAGNOSTICS BOTTOM BAR matching Screenshot 084617 */}
+      <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-3 font-mono text-slate-600">
+          <div className="flex items-center gap-1.5 font-bold text-slate-800">
+            <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
+            <span>System Diagnostics</span>
+          </div>
+          <span>•</span>
+          <div className="flex items-center gap-1.5">
+            <span>API:</span>
+            <span className="text-emerald-700 font-bold flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+              OPERATIONAL
+            </span>
+          </div>
+          <span>•</span>
+          <div className="flex items-center gap-1.5">
+            <span>DATABASE:</span>
+            <span className="text-slate-800 font-semibold">
+              CONNECTED (POSTGRESQL/PRISMA)
+            </span>
+          </div>
+          <span>•</span>
+          <div className="flex items-center gap-1.5">
+            <span>UPTIME:</span>
+            <span className="text-blue-700 font-bold">5m 23s</span>
+          </div>
+        </div>
+
+        <button
+          onClick={() => onRefreshData && onRefreshData()}
+          className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
+        >
+          <span>View Full Diagnostics</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
       </div>
     </div>
   );

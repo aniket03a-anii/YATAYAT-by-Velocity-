@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Ambulance,
   Heart,
@@ -12,12 +12,131 @@ import {
   Activity,
   ArrowRight,
   AlertOctagon,
+  Play,
+  Pause,
+  RotateCcw,
+  Sliders,
+  Check,
+  MapPin,
+  Sparkles,
 } from 'lucide-react';
+
+interface SimulationWaypoint {
+  id: string;
+  name: string;
+  distanceKm: number;
+  cleared: boolean;
+  active: boolean;
+  signalStatus: 'RED' | 'YELLOW' | 'GREEN_LOCKED';
+  timeSec: number;
+}
 
 export const GreenCorridorView: React.FC = () => {
   const [activeCorridor, setActiveCorridor] = useState<string>('GC-01');
   const [isPreemptionActive, setIsPreemptionActive] = useState<boolean>(true);
   const [etaRemaining, setEtaRemaining] = useState<string>('4.2 min');
+
+  // Simulator State
+  const [simRunning, setSimRunning] = useState<boolean>(false);
+  const [simStep, setSimStep] = useState<number>(0);
+  const [simSpeedKmph, setSimSpeedKmph] = useState<number>(62);
+  const [simDistanceRemaining, setSimDistanceRemaining] = useState<number>(6.8);
+  const [simEtaSec, setSimEtaSec] = useState<number>(240);
+  const [selectedRoute, setSelectedRoute] = useState<string>('route-gmc');
+  const [selectedAmbulance, setSelectedAmbulance] = useState<string>('MH-31-EMG-108');
+  const [simLogs, setSimLogs] = useState<string[]>([
+    'CAD 108 Emergency Telemetry Server connected.',
+    'Green wave preemption algorithms primed for Wardha Rd Spine.',
+  ]);
+
+  const [waypoints, setWaypoints] = useState<SimulationWaypoint[]>([
+    { id: 'wp-1', name: 'Airport Junction (Origin)', distanceKm: 0.0, cleared: true, active: false, signalStatus: 'GREEN_LOCKED', timeSec: 0 },
+    { id: 'wp-2', name: 'Chhatrapati Square', distanceKm: 1.6, cleared: false, active: true, signalStatus: 'GREEN_LOCKED', timeSec: 45 },
+    { id: 'wp-3', name: 'Rahate Colony Square', distanceKm: 3.4, cleared: false, active: false, signalStatus: 'GREEN_LOCKED', timeSec: 95 },
+    { id: 'wp-4', name: 'Congress Nagar Junction', distanceKm: 5.1, cleared: false, active: false, signalStatus: 'GREEN_LOCKED', timeSec: 150 },
+    { id: 'wp-5', name: 'GMC Medical Square (Dest)', distanceKm: 6.8, cleared: false, active: false, signalStatus: 'GREEN_LOCKED', timeSec: 210 },
+  ]);
+
+  // Simulation timer tick
+  useEffect(() => {
+    let interval: any = null;
+    if (simRunning) {
+      interval = setInterval(() => {
+        setSimEtaSec((prev) => {
+          if (prev <= 10) {
+            setSimRunning(false);
+            setSimLogs((logs) => [
+              `[${new Date().toLocaleTimeString()}] 🏥 ARRIVAL AT HOSPITAL: Emergency trauma unit transferred to GMC ICU!`,
+              ...logs,
+            ]);
+            return 0;
+          }
+          return prev - 5;
+        });
+
+        setSimDistanceRemaining((prev) => Math.max(0, +(prev - 0.15).toFixed(2)));
+
+        setSimStep((step) => {
+          const nextStep = (step + 1) % waypoints.length;
+          setWaypoints((prevWps) =>
+            prevWps.map((wp, idx) => ({
+              ...wp,
+              cleared: idx < nextStep,
+              active: idx === nextStep,
+              signalStatus: 'GREEN_LOCKED',
+            }))
+          );
+          if (nextStep === waypoints.length - 1) {
+            setSimLogs((logs) => [
+              `[${new Date().toLocaleTimeString()}] ✅ Final intersection cleared. GMC Trauma Bay Gates Opened.`,
+              ...logs,
+            ]);
+          } else {
+            setSimLogs((logs) => [
+              `[${new Date().toLocaleTimeString()}] 🟢 Green Wave Preemption locked for waypoint: ${waypoints[nextStep]?.name}`,
+              ...logs,
+            ]);
+          }
+          return nextStep;
+        });
+      }, 2500);
+    }
+    return () => clearInterval(interval);
+  }, [simRunning, waypoints]);
+
+  const handleStartSim = () => {
+    setSimRunning(true);
+    setSimLogs((logs) => [
+      `[${new Date().toLocaleTimeString()}] 🚨 GREEN CORRIDOR ACTIVATED: Unit ${selectedAmbulance} departing on emergency run!`,
+      ...logs,
+    ]);
+  };
+
+  const handlePauseSim = () => {
+    setSimRunning(false);
+    setSimLogs((logs) => [
+      `[${new Date().toLocaleTimeString()}] ⏸ Simulation paused.`,
+      ...logs,
+    ]);
+  };
+
+  const handleResetSim = () => {
+    setSimRunning(false);
+    setSimStep(0);
+    setSimDistanceRemaining(6.8);
+    setSimEtaSec(240);
+    setWaypoints([
+      { id: 'wp-1', name: 'Airport Junction (Origin)', distanceKm: 0.0, cleared: true, active: false, signalStatus: 'GREEN_LOCKED', timeSec: 0 },
+      { id: 'wp-2', name: 'Chhatrapati Square', distanceKm: 1.6, cleared: false, active: true, signalStatus: 'GREEN_LOCKED', timeSec: 45 },
+      { id: 'wp-3', name: 'Rahate Colony Square', distanceKm: 3.4, cleared: false, active: false, signalStatus: 'GREEN_LOCKED', timeSec: 95 },
+      { id: 'wp-4', name: 'Congress Nagar Junction', distanceKm: 5.1, cleared: false, active: false, signalStatus: 'GREEN_LOCKED', timeSec: 150 },
+      { id: 'wp-5', name: 'GMC Medical Square (Dest)', distanceKm: 6.8, cleared: false, active: false, signalStatus: 'GREEN_LOCKED', timeSec: 210 },
+    ]);
+    setSimLogs([
+      'Simulation reset to origin state.',
+      'CAD 108 Emergency Telemetry Server connected.',
+    ]);
+  };
 
   const hospitals = [
     {
@@ -110,6 +229,162 @@ export const GreenCorridorView: React.FC = () => {
             <Zap className="w-3.5 h-3.5" />
             {isPreemptionActive ? 'Preemption Active (All Clear)' : 'Preemption Paused'}
           </button>
+        </div>
+      </div>
+
+      {/* GREEN CORRIDOR SIMULATOR MODULE */}
+      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-bold">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <span>Green Corridor Live Simulator</span>
+                <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">
+                  {simRunning ? 'SIMULATING RUN' : 'STANDBY'}
+                </span>
+              </h3>
+              <p className="text-xs text-slate-500">
+                Interactive real-time demonstration of signal preemption locks and hospital telemetry synchronization.
+              </p>
+            </div>
+          </div>
+
+          {/* Simulator Action Controls */}
+          <div className="flex items-center gap-2">
+            {!simRunning ? (
+              <button
+                onClick={handleStartSim}
+                className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+              >
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Launch Corridor Sim</span>
+              </button>
+            ) : (
+              <button
+                onClick={handlePauseSim}
+                className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+              >
+                <Pause className="w-3.5 h-3.5 fill-current" />
+                <span>Pause</span>
+              </button>
+            )}
+
+            <button
+              onClick={handleResetSim}
+              className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
+              title="Reset Simulation"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Live Simulator Route Progression & Waypoints */}
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">
+                Assigned Ambulance
+              </div>
+              <div className="text-xs font-bold text-slate-900 mt-0.5">{selectedAmbulance}</div>
+              <div className="text-[10px] text-emerald-700 font-semibold">Priority 1 (ALS ICU)</div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">
+                Distance Remaining
+              </div>
+              <div className="text-base font-mono font-bold text-blue-700 mt-0.5">
+                {simDistanceRemaining.toFixed(1)} km / 6.8 km
+              </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">
+                Estimated Arrival (ETA)
+              </div>
+              <div className="text-base font-mono font-bold text-emerald-700 mt-0.5">
+                {Math.floor(simEtaSec / 60)}m {simEtaSec % 60}s
+              </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">
+                Corridor Speed
+              </div>
+              <div className="text-base font-mono font-bold text-slate-800 mt-0.5">
+                {simSpeedKmph} km/h (Clear Wave)
+              </div>
+            </div>
+          </div>
+
+          {/* Waypoint Visual Step Track */}
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+              <span>INTERSECTION SIGNAL PREEMPTION PIPELINE</span>
+              <span className="font-mono text-emerald-700 font-semibold">
+                {waypoints.filter((w) => w.cleared).length} of {waypoints.length} Passed
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-2 pt-2">
+              {waypoints.map((wp, i) => (
+                <div
+                  key={wp.id}
+                  className={`p-2.5 rounded-xl border text-xs transition-all ${
+                    wp.cleared
+                      ? 'bg-emerald-50/90 border-emerald-200 text-emerald-900'
+                      : wp.active
+                      ? 'bg-blue-50 border-blue-300 text-blue-900 ring-2 ring-blue-400/30'
+                      : 'bg-white border-slate-200 text-slate-600'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono font-bold">
+                      J-{i + 1}
+                    </span>
+                    <span
+                      className={`w-2.5 h-2.5 rounded-full ${
+                        wp.signalStatus === 'GREEN_LOCKED'
+                          ? 'bg-emerald-500 animate-pulse'
+                          : 'bg-rose-500'
+                      }`}
+                      title={wp.signalStatus}
+                    />
+                  </div>
+
+                  <div className="font-bold text-[11px] mt-1 leading-tight truncate">
+                    {wp.name}
+                  </div>
+
+                  <div className="text-[10px] font-mono text-slate-500 mt-1 flex items-center justify-between">
+                    <span>{wp.distanceKm} km</span>
+                    <span className="font-bold text-emerald-700">
+                      {wp.cleared ? 'CLEARED' : wp.active ? 'APPROACHING' : 'PREEMPTED'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Real-time Simulator Event Log Feed */}
+          <div className="space-y-1.5">
+            <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+              Live Preemption Event Log:
+            </div>
+            <div className="p-3 rounded-xl bg-slate-900 text-slate-300 font-mono text-[11px] space-y-1 max-h-24 overflow-y-auto">
+              {simLogs.map((log, index) => (
+                <div key={index} className="flex items-start gap-1.5">
+                  <span className="text-emerald-400">❯</span>
+                  <span>{log}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -217,11 +492,11 @@ export const GreenCorridorView: React.FC = () => {
                 </div>
 
                 <button
-                  onClick={() => alert(`Preemption Green Wave signals locked for ${c.ambulanceId}`)}
+                  onClick={() => handleStartSim()}
                   className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <Navigation className="w-3.5 h-3.5" />
-                  Monitor Telemetry
+                  Run Simulator Run
                 </button>
               </div>
             </div>

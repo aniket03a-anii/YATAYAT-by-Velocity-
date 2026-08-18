@@ -124,8 +124,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#f4f7fb] flex flex-col justify-between items-center p-4 sm:p-6 lg:p-8 font-sans antialiased text-slate-900">
-      <div className="w-full flex-1 flex items-center justify-center py-6">
+    <div className="min-h-screen w-full bg-[#f4f7fb] flex flex-col justify-between items-center font-sans antialiased text-slate-900">
+      {/* Top Dark Banner matching Screenshot 084018 */}
+      <div className="w-full bg-[#111827] text-slate-300 text-[11px] px-4 sm:px-6 py-2 flex items-center justify-between border-b border-slate-800 font-mono">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="font-bold text-slate-200 uppercase tracking-wide">
+            GOVERNMENT OF MAHARASHTRA | NAGPUR SMART & CONNECTED CITY
+          </span>
+        </div>
+        <div className="hidden sm:block text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+          INTELLIGENT INTEGRATED TRAFFIC MANAGEMENT SYSTEM (I²TMS)
+        </div>
+      </div>
+
+      <div className="w-full flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 py-6">
         <div className="w-full max-w-5xl bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 transition-all">
           {/* LEFT COLUMN: Operator / Citizen Sign-In Form */}
           <div className="lg:col-span-6 p-6 sm:p-8 lg:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-200 space-y-6">

@@ -75,10 +75,24 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   };
 
   return (
-    <header
-      id="nagpur-top-header"
-      className="sticky top-0 z-40 w-full bg-white border-b border-slate-200 shadow-2xs text-slate-800"
-    >
+    <div className="sticky top-0 z-40 w-full flex flex-col">
+      {/* Top Dark Prototype Status Banner */}
+      <div className="w-full bg-[#111827] text-slate-300 text-[11px] px-4 py-1.5 flex items-center justify-between border-b border-slate-800 font-mono">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="font-semibold text-slate-200">
+            DEMO PROTOTYPE MODE: Intelligent Integrated Traffic Management System (I²TMS) — Nagpur Jurisdiction.
+          </span>
+        </div>
+        <div className="hidden sm:block text-slate-400 text-[10px]">
+          Govt. of Maharashtra / Smart City Project
+        </div>
+      </div>
+
+      <header
+        id="nagpur-top-header"
+        className="w-full bg-white border-b border-slate-200 shadow-2xs text-slate-800"
+      >
       <div className="w-full px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
         {/* Left Branding matching image: I2TMS NAGPUR tag & subtitle */}
         <div className="flex items-center gap-3">
@@ -206,5 +220,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         </div>
       </div>
     </header>
+    </div>
   );
 };

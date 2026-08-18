@@ -42,7 +42,6 @@ import { AuditReportsView } from './components/reports/AuditReportsView';
 import { CitizenPortalView } from './components/citizen/CitizenPortalView';
 import { AnalyticsView } from './components/analytics/AnalyticsView';
 import { DynamicRedeploymentSimulation } from './components/simulation/DynamicRedeploymentSimulation';
-import { MobileFieldOfficerView } from './components/mobile/MobileFieldOfficerView';
 import { SystemHealthView } from './components/system/SystemHealthView';
 import { ArchitectureImpactView } from './components/system/ArchitectureImpactView';
 
@@ -126,7 +125,7 @@ export function App() {
     return () => clearInterval(interval);
   }, [isLiveFeedActive, simulationStep]);
 
-  // Handlers for Simulation
+  // Handlers for Simulation (19 Steps: index 0 to 18)
   const handleTriggerSimulationStep = (step: number) => {
     setSimulationStep(step);
 
@@ -134,72 +133,138 @@ export function App() {
       return prevJunctions.map((j) => {
         if (j.id === 'J-01' || j.id === 'JNC-01' || j.name.toLowerCase().includes('sitabuldi')) {
           if (step === 0) {
+            // Step 1: Baseline City Equilibrium
             return calculateJunctionRisk({
               ...j,
-              riskScore: 48,
+              riskScore: 42,
               riskCategory: 'MEDIUM',
               trafficCondition: 'Moderate',
-              avgSpeedKmph: 28,
-              vehicleCountPerHour: 3400,
+              avgSpeedKmph: 34,
+              vehicleCountPerHour: 3200,
               weatherCondition: 'Clear',
-              accidentRisk: 35,
-              congestionRisk: 42,
-              weatherImpact: 20,
-              violationRisk: 40,
+              accidentRisk: 22,
+              congestionRisk: 28,
+              weatherImpact: 10,
+              violationRisk: 25,
               assignedOfficerIds: ['OFF-101'],
-              requiredOfficers: 2,
+              requiredOfficers: 1,
               activeIncidentIds: [],
               hasCoverageGap: false,
               policeCoverage: 'ADEQUATE',
             });
           } else if (step === 1) {
+            // Step 2: Computer Vision Detection
             return calculateJunctionRisk({
               ...j,
-              accidentRisk: 85,
-              activeIncidentIds: ['INC-SIM-01'],
+              riskScore: 56,
+              riskCategory: 'HIGH',
               trafficCondition: 'Heavy',
-              avgSpeedKmph: 18,
+              avgSpeedKmph: 24,
+              vehicleCountPerHour: 3600,
+              accidentRisk: 65,
+              congestionRisk: 48,
+              activeIncidentIds: ['INC-SIM-01'],
+              requiredOfficers: 2,
+              hasCoverageGap: true,
+              policeCoverage: 'INSUFFICIENT',
             });
           } else if (step === 2) {
+            // Step 3: Multi-Vehicle Collision Confirmed
             return calculateJunctionRisk({
               ...j,
-              weatherCondition: 'Rainy',
-              weatherImpact: 80,
-              avgSpeedKmph: 14,
+              riskScore: 68,
+              riskCategory: 'HIGH',
+              trafficCondition: 'Heavy',
+              avgSpeedKmph: 17,
+              vehicleCountPerHour: 4100,
+              accidentRisk: 78,
+              congestionRisk: 62,
+              activeIncidentIds: ['INC-SIM-01'],
+              requiredOfficers: 3,
+              hasCoverageGap: true,
+              policeCoverage: 'INSUFFICIENT',
             });
           } else if (step === 3) {
+            // Step 4: Monsoon Downpour
             return calculateJunctionRisk({
               ...j,
-              congestionRisk: 92,
-              trafficCondition: 'Gridlock',
-              avgSpeedKmph: 6,
-              vehicleCountPerHour: 4800,
+              riskScore: 78,
+              riskCategory: 'HIGH',
+              weatherCondition: 'Rainy',
+              weatherImpact: 82,
+              trafficCondition: 'Heavy',
+              avgSpeedKmph: 11,
+              vehicleCountPerHour: 4400,
+              accidentRisk: 82,
+              congestionRisk: 78,
+              requiredOfficers: 3,
+              hasCoverageGap: true,
+              policeCoverage: 'INSUFFICIENT',
             });
-          } else if (step >= 4 && step < 8) {
+          } else if (step === 4) {
+            // Step 5: Queue Spillback
             return calculateJunctionRisk({
               ...j,
-              riskScore: 87,
+              riskScore: 84,
               riskCategory: 'CRITICAL',
+              weatherCondition: 'Rainy',
+              weatherImpact: 82,
+              trafficCondition: 'Gridlock',
+              avgSpeedKmph: 5.8,
+              vehicleCountPerHour: 4800,
+              accidentRisk: 85,
+              congestionRisk: 94,
+              requiredOfficers: 4,
+              hasCoverageGap: true,
+              policeCoverage: 'INSUFFICIENT',
+            });
+          } else if (step >= 5 && step <= 13) {
+            // Steps 6 to 14: AI Risk Surge, Triage, Dispatch, Green Corridor Active
+            return calculateJunctionRisk({
+              ...j,
+              riskScore: step >= 11 ? 72 : 89,
+              riskCategory: step >= 11 ? 'HIGH' : 'CRITICAL',
               accidentRisk: 88,
               congestionRisk: 95,
               weatherImpact: 78,
-              violationRisk: 65,
+              violationRisk: 45,
               requiredOfficers: 3,
               assignedOfficerIds: ['OFF-101'],
               hasCoverageGap: true,
               policeCoverage: 'INSUFFICIENT',
+              trafficCondition: 'Gridlock',
+              avgSpeedKmph: step >= 11 ? 9.8 : 5.0,
             });
-          } else if (step >= 8) {
+          } else if (step >= 14 && step <= 16) {
+            // Steps 15 to 17: Officers Arrived (3 on scene), Evacuation, Drainage
             return calculateJunctionRisk({
               ...j,
-              riskScore: 44,
-              riskCategory: 'LOW',
-              accidentRisk: 28,
-              congestionRisk: 34,
+              riskScore: step === 16 ? 42 : 54,
+              riskCategory: 'MEDIUM',
+              accidentRisk: 35,
+              congestionRisk: 48,
+              weatherImpact: 20,
               trafficCondition: 'Moderate',
-              avgSpeedKmph: 26,
+              avgSpeedKmph: 22,
               requiredOfficers: 3,
               assignedOfficerIds: ['OFF-101', 'OFF-017', 'OFF-024'],
+              hasCoverageGap: false,
+              policeCoverage: 'ADEQUATE',
+            });
+          } else if (step >= 17) {
+            // Steps 18 to 19: Queue Flushed & Post-Audit Resolved
+            return calculateJunctionRisk({
+              ...j,
+              riskScore: 36,
+              riskCategory: 'LOW',
+              accidentRisk: 18,
+              congestionRisk: 24,
+              weatherImpact: 8,
+              trafficCondition: 'Moderate',
+              avgSpeedKmph: 32,
+              requiredOfficers: 1,
+              assignedOfficerIds: ['OFF-101'],
+              activeIncidentIds: [],
               hasCoverageGap: false,
               policeCoverage: 'ADEQUATE',
             });
@@ -209,13 +274,13 @@ export function App() {
       });
     });
 
-    if (step >= 8) {
+    if (step >= 10 && step <= 16) {
       setOfficers((prevOfficers) =>
         prevOfficers.map((o) => {
           if (o.id === 'OFF-017' || o.id === 'OFF-024' || o.badgeNumber === 'O-17' || o.badgeNumber === 'O-24') {
             return {
               ...o,
-              status: 'DEPLOYED',
+              status: step >= 14 ? 'DEPLOYED' : 'EN_ROUTE',
               assignedJunctionId: 'JNC-01',
               assignedJunctionName: 'Sitabuldi Interchange Square',
             };
@@ -223,7 +288,18 @@ export function App() {
           return o;
         })
       );
-      showToast('⚡ AI Dynamic Redeployment Executed: Officers O-17 & O-24 on scene at Sitabuldi!');
+    } else if (step >= 17) {
+      setOfficers((prevOfficers) =>
+        prevOfficers.map((o) => {
+          if (o.id === 'OFF-017' || o.id === 'OFF-024' || o.badgeNumber === 'O-17' || o.badgeNumber === 'O-24') {
+            return {
+              ...o,
+              status: 'AVAILABLE',
+            };
+          }
+          return o;
+        })
+      );
     }
   };
 
@@ -457,12 +533,12 @@ export function App() {
   const activeIncidents = incidents.filter((i) => i.status !== 'RESOLVED');
 
   const activeSimulationPath =
-    simulationStep === 8
+    simulationStep >= 9 && simulationStep <= 13
       ? {
           from: { lat: 21.154, lng: 79.072, name: 'Civil Lines' },
           to: { lat: 21.1466, lng: 79.0825, name: 'Sitabuldi Interchange' },
           officerBadge: 'O-17',
-          progress: 0.75,
+          progress: Math.min(1.0, 0.25 * (simulationStep - 8)),
         }
       : null;
 

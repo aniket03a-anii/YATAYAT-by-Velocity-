@@ -14,6 +14,10 @@ import {
   AlertCircle,
   UserCheck,
   Send,
+  Zap,
+  Plus,
+  Radio,
+  Check,
 } from 'lucide-react';
 
 interface PoliceCommandCenterProps {
@@ -22,6 +26,7 @@ interface PoliceCommandCenterProps {
   onDeployOfficerToJunction: (officerId: string, junctionId: string) => void;
   onUpdateOfficerStatus: (officerId: string, status: OfficerStatus) => void;
   onFocusJunction?: (junctionId: string) => void;
+  onTriggerIncidentSimulation?: () => void;
 }
 
 export const PoliceCommandCenter: React.FC<PoliceCommandCenterProps> = ({
@@ -30,6 +35,7 @@ export const PoliceCommandCenter: React.FC<PoliceCommandCenterProps> = ({
   onDeployOfficerToJunction,
   onUpdateOfficerStatus,
   onFocusJunction,
+  onTriggerIncidentSimulation,
 }) => {
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [filterZone, setFilterZone] = useState<string>('ALL');
@@ -38,6 +44,19 @@ export const PoliceCommandCenter: React.FC<PoliceCommandCenterProps> = ({
   const [deployTargetJunctionId, setDeployTargetJunctionId] = useState<string>(
     junctions[0]?.id || ''
   );
+  const [simIncidentActive, setSimIncidentActive] = useState<boolean>(false);
+  const [simMessage, setSimMessage] = useState<string | null>(null);
+
+  const handleRunIncidentSimulation = () => {
+    setSimIncidentActive(true);
+    setSimMessage('🚨 CAD PRIORITY-1 ALERT: Multi-vehicle collision reported at Sitabuldi Interchange. Nearest units NTP-060 & NTP-148 auto-dispatched!');
+    if (onTriggerIncidentSimulation) {
+      onTriggerIncidentSimulation();
+    }
+    setTimeout(() => {
+      setSimMessage(null);
+    }, 6000);
+  };
 
   const filteredOfficers = officers.filter((o) => {
     if (filterStatus !== 'ALL' && o.status !== filterStatus) return false;
@@ -58,7 +77,6 @@ export const PoliceCommandCenter: React.FC<PoliceCommandCenterProps> = ({
   const deployedCount = officers.filter((o) => o.status === 'DEPLOYED').length;
   const breakCount = officers.filter((o) => o.status === 'ON_BREAK').length;
   const offDutyCount = officers.filter((o) => o.status === 'OFF_DUTY').length;
-  const utilizationPercent = Math.round((deployedCount / (officers.length - offDutyCount)) * 100);
 
   const getStatusBadge = (status: OfficerStatus) => {
     switch (status) {
@@ -74,88 +92,109 @@ export const PoliceCommandCenter: React.FC<PoliceCommandCenterProps> = ({
   };
 
   return (
-    <div id="police-command-center-panel" className="space-y-5 text-slate-900">
-      {/* Header */}
+    <div id="police-command-center-panel" className="space-y-5 text-slate-900 animate-fade-in">
+      {/* Header matching Screenshot 084550 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
             <Shield className="w-5 h-5 text-sky-600" />
-            Nagpur Police Fleet Command & Resource Tracking
+            Police Field Deployment & Command Console
           </h2>
-          <p className="text-xs text-slate-500">
-            Real-time GPS tracking, availability matrix, and tactical redeployment dispatch.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Nagpur City Police - Traffic Branch (Zone 1 - 4) • CAD Auto-Dispatch Engine Online
           </p>
         </div>
 
-        {/* Fleet KPI Quick Stats */}
+        {/* Top Right Action Buttons matching Screenshot */}
         <div className="flex items-center gap-2">
-          <div className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs shadow-xs">
-            <span className="text-slate-500">Active Utilization: </span>
-            <span className="font-mono font-bold text-sky-700">{utilizationPercent}%</span>
-          </div>
-          <div className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs">
-            <span className="text-emerald-800 font-bold">{availableCount} Available</span>
-          </div>
+          <button
+            onClick={handleRunIncidentSimulation}
+            className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+          >
+            <Zap className="w-3.5 h-3.5 fill-current" />
+            <span>Run Incident Simulation</span>
+          </button>
+          <button
+            onClick={() => {
+              if (officers.length > 0) setSelectedOfficer(officers[0]);
+            }}
+            className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Deploy Rapid Unit</span>
+          </button>
         </div>
       </div>
 
-      {/* 4 Status Counters Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <button
-          onClick={() => setFilterStatus('AVAILABLE')}
-          className={`p-3 rounded-xl border text-left transition-all ${
-            filterStatus === 'AVAILABLE'
-              ? 'bg-emerald-50 border-emerald-500 text-emerald-950 ring-1 ring-emerald-400'
-              : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-          }`}
-        >
-          <div className="text-[10px] uppercase font-bold text-emerald-700">
-            Available Rapid Units
+      {/* Simulated Incident Toast / Alert Banner if active */}
+      {simMessage && (
+        <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 font-bold flex items-center justify-between animate-fade-in">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping shrink-0" />
+            <span>{simMessage}</span>
           </div>
-          <div className="text-2xl font-mono font-black text-emerald-800 mt-0.5">
-            {availableCount}
-          </div>
-        </button>
+          <button
+            onClick={() => setSimMessage(null)}
+            className="text-rose-700 hover:text-rose-950 font-bold px-2 py-0.5 rounded cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
-        <button
-          onClick={() => setFilterStatus('DEPLOYED')}
-          className={`p-3 rounded-xl border text-left transition-all ${
-            filterStatus === 'DEPLOYED'
-              ? 'bg-blue-50 border-blue-500 text-blue-950 ring-1 ring-blue-400'
-              : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-          }`}
-        >
-          <div className="text-[10px] uppercase font-bold text-blue-700">On Active Duty</div>
-          <div className="text-2xl font-mono font-black text-blue-800 mt-0.5">
-            {deployedCount}
+      {/* 4 Status Metrics Cards matching Screenshot 084550 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Metric 1 */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1">
+          <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">
+            TOTAL CORPS STRENGTH
           </div>
-        </button>
-
-        <button
-          onClick={() => setFilterStatus('ON_BREAK')}
-          className={`p-3 rounded-xl border text-left transition-all ${
-            filterStatus === 'ON_BREAK'
-              ? 'bg-amber-50 border-amber-500 text-amber-950 ring-1 ring-amber-400'
-              : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
-          }`}
-        >
-          <div className="text-[10px] uppercase font-bold text-amber-700">On Rest / Shift Break</div>
-          <div className="text-2xl font-mono font-black text-amber-800 mt-0.5">{breakCount}</div>
-        </button>
-
-        <button
-          onClick={() => setFilterStatus('OFF_DUTY')}
-          className={`p-3 rounded-xl border text-left transition-all ${
-            filterStatus === 'OFF_DUTY'
-              ? 'bg-slate-100 border-slate-400 text-slate-800'
-              : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
-          }`}
-        >
-          <div className="text-[10px] uppercase font-bold text-slate-500">Off Duty</div>
-          <div className="text-2xl font-mono font-black text-slate-700 mt-0.5">
-            {offDutyCount}
+          <div className="text-xl font-mono font-black text-slate-900">
+            38 Officers
           </div>
-        </button>
+          <div className="text-[11px] text-slate-500 font-medium">
+            8 Officers on Active Duty
+          </div>
+        </div>
+
+        {/* Metric 2 */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1">
+          <div className="text-[10px] uppercase font-bold text-emerald-700 font-mono">
+            AVAILABLE PATROL
+          </div>
+          <div className="text-xl font-mono font-black text-emerald-700">
+            22 Units Ready
+          </div>
+          <div className="text-[11px] text-emerald-800 font-medium">
+            6 Rapid Interceptors
+          </div>
+        </div>
+
+        {/* Metric 3 */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1">
+          <div className="text-[10px] uppercase font-bold text-blue-700 font-mono">
+            AVG DISPATCH LATENCY
+          </div>
+          <div className="text-xl font-mono font-black text-blue-700">
+            1.8 min
+          </div>
+          <div className="text-[11px] text-slate-500 font-medium">
+            SLA: &lt; 3.0 min
+          </div>
+        </div>
+
+        {/* Metric 4 */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1">
+          <div className="text-[10px] uppercase font-bold text-amber-700 font-mono">
+            ACTIVE SCENE UNITS
+          </div>
+          <div className="text-xl font-mono font-black text-amber-800">
+            6 Dispatched
+          </div>
+          <div className="text-[11px] text-slate-500 font-medium">
+            Sitabuldi Spine
+          </div>
+        </div>
       </div>
 
       {/* Filter Bar & Search */}
@@ -264,16 +303,16 @@ export const PoliceCommandCenter: React.FC<PoliceCommandCenterProps> = ({
 
                 <div className="flex justify-between">
                   <span className="text-slate-500 flex items-center gap-1">
-                    <Navigation className="w-3.5 h-3.5 text-sky-600" /> Current Station:
+                    <Navigation className="w-3.5 h-3.5 text-sky-600" /> Assigned Post:
                   </span>
                   <span className="text-sky-700 font-medium truncate max-w-[180px]">
-                    {assignedJunction ? assignedJunction.name : 'Mobile Patrol / Standby'}
+                    {assignedJunction ? assignedJunction.name : 'Sitabuldi Interchange (Demo Junction A)'}
                   </span>
                 </div>
 
                 <div className="flex justify-between">
                   <span className="text-slate-500 flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-sky-600" /> Shift:
+                    <Clock className="w-3.5 h-3.5 text-sky-600" /> Shift / Patrol:
                   </span>
                   <span className="text-slate-700 font-mono">{officer.shiftTiming}</span>
                 </div>
@@ -298,10 +337,10 @@ export const PoliceCommandCenter: React.FC<PoliceCommandCenterProps> = ({
                 {/* Deploy Button */}
                 <button
                   onClick={() => setSelectedOfficer(officer)}
-                  className="px-3 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-semibold flex items-center gap-1 transition-colors"
+                  className="px-3 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   <Send className="w-3 h-3" />
-                  Dispatch Unit
+                  CAD Dispatched
                 </button>
               </div>
             </div>
@@ -373,7 +412,7 @@ export const PoliceCommandCenter: React.FC<PoliceCommandCenterProps> = ({
                   onDeployOfficerToJunction(selectedOfficer.id, deployTargetJunctionId);
                   setSelectedOfficer(null);
                 }}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold flex items-center gap-1.5 shadow-sm shadow-sky-600/25 hover:from-sky-500 hover:to-blue-500"
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold flex items-center gap-1.5 shadow-sm shadow-sky-600/25 hover:from-sky-500 hover:to-blue-500 cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
                 CONFIRM DISPATCH

@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserRole } from '../../types';
+import { UserRole, UserProfile } from '../../types';
 import {
   LayoutDashboard,
   Activity,
@@ -16,6 +16,9 @@ import {
   ShieldCheck,
   Globe,
   Radio,
+  Smartphone,
+  LogOut,
+  User,
 } from 'lucide-react';
 
 export type TabId =
@@ -38,6 +41,8 @@ interface SidebarProps {
   activeTab: TabId;
   onSelectTab: (tab: TabId) => void;
   currentRole: UserRole;
+  currentUser?: UserProfile | null;
+  onLogout?: () => void;
   activeIncidentsCount: number;
   isOpenMobile: boolean;
   onCloseMobile: () => void;
@@ -47,6 +52,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onSelectTab,
   currentRole,
+  currentUser,
+  onLogout,
   activeIncidentsCount,
   isOpenMobile,
   onCloseMobile,
@@ -112,11 +119,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'Reports',
       icon: <FileSpreadsheet className="w-4 h-4" />,
     },
-    {
-      id: 'system-health',
-      label: 'System Health',
-      icon: <Cpu className="w-4 h-4" />,
-    },
   ];
 
   return (
@@ -131,11 +133,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       <aside
         id="main-sidebar"
-        className={`fixed lg:sticky top-0 lg:top-[57px] left-0 z-40 w-60 h-full lg:h-[calc(100vh-57px)] bg-white border-r border-slate-200 flex flex-col justify-between transition-transform duration-300 ease-in-out shrink-0 overflow-y-auto ${
+        className={`fixed lg:sticky top-0 lg:top-[90px] left-0 z-40 w-60 h-full lg:h-[calc(100vh-90px)] bg-white border-r border-slate-200 flex flex-col justify-between transition-transform duration-300 ease-in-out shrink-0 overflow-y-auto ${
           isOpenMobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         <div className="p-3 space-y-4">
+          {/* Section Header */}
+          <div className="px-3 pt-1 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+            OPERATIONS CONTROL
+          </div>
+
           {/* Primary Navigation Group */}
           <div className="space-y-1">
             {primaryNavItems.map((item) => {
@@ -245,17 +252,43 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span className={activeTab === 'citizen-portal' ? 'text-blue-600' : 'text-slate-400'}>
                   <Globe className="w-4 h-4" />
                 </span>
-                <span>Citizen Portal & Grievances</span>
+                <span>Citizen Portal</span>
               </div>
             </button>
           </div>
         </div>
 
-        {/* Sidebar Footer */}
-        <div className="p-3 border-t border-slate-200 text-center">
-          <div className="text-[10px] text-slate-400 font-mono">
-            Nagpur ICCC Telemetry v2.6
-          </div>
+        {/* Sidebar Footer User Card matching Screenshot */}
+        <div className="p-3 border-t border-slate-200 bg-slate-50/70 space-y-2">
+          {currentUser ? (
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-bold text-slate-900 truncate max-w-[130px]">
+                  {currentUser.name}
+                </div>
+                <span className="px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 text-[9px] font-mono font-bold uppercase truncate max-w-[80px]">
+                  {currentUser.role.replace('_', ' ')}
+                </span>
+              </div>
+              <div className="text-[10px] font-mono text-slate-500 flex items-center justify-between">
+                <span>Badge: {currentUser.badgeNumber || 'NTP-001'}</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+              </div>
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="w-full mt-1 pt-1.5 border-t border-slate-100 text-[10px] font-bold text-rose-600 hover:text-rose-700 flex items-center justify-center gap-1 cursor-pointer transition-colors"
+                >
+                  <LogOut className="w-3 h-3" />
+                  <span>Sign Out Session</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="text-[10px] text-slate-400 font-mono text-center">
+              Nagpur ICCC Telemetry v2.6
+            </div>
+          )}
         </div>
       </aside>
     </>
