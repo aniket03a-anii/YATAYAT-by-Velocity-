@@ -1,0 +1,6 @@
+{
+  "name": "NAGPUR TRAFFIC AI",
+  "description": "Intelligent Risk Heatmap & Police Deployment Decision Support for Nagpur City",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
